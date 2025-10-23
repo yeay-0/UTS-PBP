@@ -1,0 +1,911 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OwlyReads</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body{
+            font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+            background: linear-gradient(135deg, #ffeaf0 0%, #F09410 100%);
+            min-height: 100vh;
+        }
+        .section{
+            display: none;
+            min-height: 70vh;
+            padding-bottom: 50px;
+        }
+        .section.active{
+            display: block;
+        }
+        .section1{
+            display: flex;
+            flex-direction: row;
+        }
+        .box-card{
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 25px;
+            padding: 20px 35px;
+            align-items: center;
+        }
+        .genre{
+            padding: 20px 35px;
+            display: flex;
+            flex-direction: column;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 5px 15px rgba(240, 148, 16, 0.2);
+            transition: transform 0.3s;
+        }
+        .genre:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 25px rgba(240, 148, 16, 0.3);
+        }
+        .genre-title {
+            margin-bottom: 15px;
+            color: #BC430D;
+            font-weight: 700;
+        }
+        .card {
+            width: 120px;
+            height: 180px;
+            background-color: white;
+            border-radius: 12px;
+            box-shadow: 0 5px 20px rgba(240, 148, 16, 0.15);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            left: 0px;
+            transition: 0.3s;
+            font-weight: 600;
+            cursor: pointer;
+            color: #F09410;
+        }
+        .card img{
+            width: 120px;
+            height: 180px;
+            object-fit: cover;
+            border-radius: 10px;
+        }
+        .card-container {
+            display: flex;
+            padding: 0px 30px;
+        }
+        .card {
+            position: relative;
+            left: 0px;
+        }
+        .card:not(:first-child) {
+            margin-left: -50px;
+        }
+        .card:hover {
+            transform: translateY(-20px);
+            z-index: 10;
+        }
+        .card:hover ~ .card {
+            left: 50px;
+        }
+        .modal {
+            padding: 25px 30px;
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.6);
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+        .modal-content {
+            background: white;
+            padding: 20px;
+            border-radius: 12px;
+            width: 650px;
+            max-width: 80%;
+            text-align: center;
+            align-items: center;
+            position: relative;
+            animation: slideIn 0.3s ease;
+        }
+        @keyframes slideIn {
+            from { transform: scale(0.8); opacity: 0; }
+            to { transform: scale(1); opacity: 1; }
+        }
+        .close {
+            position: absolute;
+            top: 15px;
+            right: 25px;
+            font-size: 24px;
+            cursor: pointer;
+            color: #BC430D;
+        }
+        .close:hover {
+            color: #F09410;
+        }
+        .modal-content button{
+            border-radius: 10px;
+            border: 0px;
+            background: linear-gradient(135deg, #F09410 0%, #BC430D 100%);
+            color: white;
+            padding: 8px 30px;
+            margin: 5px;
+            cursor: pointer;
+            transition: 0.3s;
+            font-weight: 600;
+        }
+        .modal-content button:hover{
+            background: linear-gradient(135deg, #BC430D 0%, #F09410 100%);
+            transform: scale(1.05);
+        }
+        .modal-content img{
+            width: 250px;
+            object-fit: cover;
+            justify-content: center;
+            align-items: center;
+            border-radius: 10px;
+            margin-bottom: 15px;
+        }
+        .modal-content h2 {
+            color: #BC430D;
+            font-weight: 700;
+        }
+        .modal-content p {
+            color: #555;
+        }
+        .all-books-container {
+            padding: 30px;
+            animation: fadeIn 0.5s;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        .book-grid-item {
+            background: white;
+            border-radius: 12px;
+            padding: 15px;
+            text-align: center;
+            cursor: pointer;
+            transition: 0.3s;
+            box-shadow: 0 3px 10px rgba(240, 148, 16, 0.15);
+        }
+        .book-grid-item:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 8px 20px rgba(240, 148, 16, 0.3);
+        }
+        .book-grid-item img {
+            width: 100%;
+            height: 250px;
+            object-fit: cover;
+            border-radius: 10px;
+            margin-bottom: 10px;
+        }
+        .book-grid-item h5 {
+            color: #333;
+        }
+        .book-grid-item p {
+            color: #F09410;
+            font-weight: bold;
+        }
+        .book-grid-item small {
+            color: #BC430D;
+        }
+        .cart-icon {
+            position: relative;
+            cursor: pointer;
+            font-size: 24px;
+            color: #BC430D;
+            margin-right: 20px;
+            transition: 0.3s;
+        }
+        .cart-icon:hover {
+            transform: scale(1.1);
+            color: #F09410;
+        }
+        .cart-badge {
+            position: absolute;
+            top: -8px;
+            right: -8px;
+            background: linear-gradient(135deg, #F09410 0%, #BC430D 100%);
+            color: white;
+            border-radius: 50%;
+            width: 20px;
+            height: 20px;
+            font-size: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+        }
+        .cart-sidebar {
+            position: fixed;
+            right: -400px;
+            top: 0;
+            width: 400px;
+            height: 100vh;
+            background: white;
+            box-shadow: -2px 0 10px rgba(240, 148, 16, 0.3);
+            transition: 0.3s;
+            z-index: 1001;
+            overflow-y: auto;
+            padding: 20px;
+        }
+        .cart-sidebar.active {
+            right: 0;
+        }
+        .cart-sidebar h3 {
+            color: #BC430D;
+            font-weight: 700;
+        }
+        .cart-item {
+            display: flex;
+            gap: 15px;
+            padding: 15px;
+            border-bottom: 1px solid #ffeaf0;
+            align-items: center;
+        }
+        .cart-item img {
+            width: 60px;
+            height: 90px;
+            object-fit: cover;
+            border-radius: 5px;
+        }
+        .cart-item-info {
+            flex: 1;
+            text-align: left;
+        }
+        .cart-item-info strong {
+            color: #333;
+        }
+        .cart-item-info small {
+            color: #F09410;
+        }
+        .cart-item-remove {
+            background: #BC430D;
+            color: white;
+            border: none;
+            padding: 5px 10px;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+        .cart-item-remove:hover {
+            background: #F09410;
+        }
+        .cart-total {
+            margin-top: 20px;
+            padding-top: 20px;
+            border-top: 2px solid #BC430D;
+            font-size: 20px;
+            font-weight: bold;
+            color: #BC430D;
+        }
+        .social-box{
+            display: flex;
+            gap: 30px;
+            padding: 30px;
+        }
+        .socials{
+            padding: 20px 5px;
+            flex: 1;
+        }
+        .socials h3 {
+            color: #BC430D;
+            font-weight: 700;
+            margin-bottom: 20px;
+        }
+        .socials .card {
+            width: 100%;
+            height: auto;
+            padding: 20px;
+            margin-bottom: 15px;
+            background: linear-gradient(135deg, #F09410 0%, #BC430D 100%);
+            color: white;
+            transition: 0.3s;
+        }
+        .socials .card:hover {
+            transform: scale(1.05);
+            background: linear-gradient(135deg, #BC430D 0%, #F09410 100%);
+        }
+        .bio{
+            border-radius: 5px;
+            width: 100%;
+            padding: 8px;
+            border: 2px solid #ffeaf0;
+            transition: 0.3s;
+        }
+        .bio:focus {
+            outline: none;
+            border-color: #F09410;
+        }
+        .send {
+            background: linear-gradient(135deg, #F09410 0%, #BC430D 100%);
+            color: white;
+            border: none;
+            padding: 10px 30px;
+            border-radius: 8px;
+            cursor: pointer;
+            margin-top: 10px;
+            transition: 0.3s;
+            font-weight: 600;
+        }
+        .send:hover {
+            background: linear-gradient(135deg, #BC430D 0%, #F09410 100%);
+            transform: scale(1.05);
+        }
+        .navbar-brand {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .navbar-brand h1 {
+            color: #BC430D;
+            font-weight: 800;
+            margin: 0;
+        }
+        .owl-logo {
+            font-size: 32px;
+        }
+        .nav-link {
+            color: #BC430D !important;
+            font-weight: 600;
+            transition: 0.3s;
+        }
+        .nav-link:hover {
+            color: #F09410 !important;
+        }
+        .nav-link.active {
+            color: #F09410 !important;
+            border-bottom-color: #F09410 !important;
+        }
+        #home {
+            min-height: 80vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            padding: 50px;
+        }
+        #home h1 {
+            font-size: 4rem;
+            color: #BC430D;
+            margin-bottom: 20px;
+            animation: bounce 2s infinite;
+            font-weight: 800;
+        }
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-20px); }
+        }
+        .home-subtitle {
+            font-size: 1.5rem;
+            color: #666;
+            margin-bottom: 30px;
+        }
+        .home-features {
+            display: flex;
+            gap: 30px;
+            margin-top: 50px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+        .feature-card {
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 5px 15px rgba(240, 148, 16, 0.2);
+            width: 250px;
+            transition: 0.3s;
+        }
+        .feature-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 10px 25px rgba(240, 148, 16, 0.3);
+        }
+        .feature-card h4 {
+            color: #BC430D;
+            font-weight: 700;
+        }
+        .feature-card p {
+            color: #666;
+        }
+        .checkout-btn {
+            width: 100%;
+            padding: 15px;
+            background: linear-gradient(135deg, #F09410 0%, #BC430D 100%);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            margin-top: 20px;
+            transition: 0.3s;
+        }
+        .checkout-btn:hover {
+            transform: scale(1.02);
+            background: linear-gradient(135deg, #BC430D 0%, #F09410 100%);
+        }
+        .box-kontak{
+            flex: 1;
+            padding: 20px;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 5px 15px rgba(240, 148, 16, 0.2);
+        }
+        .box-kontak h3 {
+            color: #BC430D;
+            font-weight: 700;
+        }
+        .box-kontak label, .box-kontak input::placeholder, .box-kontak textarea::placeholder {
+            color: #666;
+        }
+        .btn-secondary {
+            background: linear-gradient(135deg, #F09410 0%, #BC430D 100%);
+            border: none;
+            font-weight: 600;
+            transition: 0.3s;
+        }
+        .btn-secondary:hover {
+            background: linear-gradient(135deg, #BC430D 0%, #F09410 100%);
+            transform: scale(1.05);
+        }
+        #categoryTitle {
+            color: #BC430D;
+            font-weight: 700;
+        }
+        .cart-item button {
+            background: #ffeaf0;
+            border: 1px solid #F09410;
+            color: #BC430D;
+            font-weight: 600;
+        }
+        .cart-item button:hover {
+            background: #F09410;
+            color: white;
+        }
+        
+    </style>
+</head>
+<body>
+    <div id="overlay" style="display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 999;" onclick="toggleCart()"></div>
+    
+    <nav class="navbar bg-body-tertiary">
+    <div class="container-fluid">
+        <a class="navbar-brand" href="#" onclick="showSection('home', this); return false;">
+            <span class="owl-logo">🦉</span>
+            <h1>OwlyReads</h1>
+        </a>
+
+        <ul class="nav nav-underline" style="align-items: center;">
+        <li class="nav-item">
+            <a class="nav-link active" aria-current="page" href="#home" onclick="showSection('home',this); return false;">Home</a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" href="#books" onclick="showSection('books',this); return false;">Books</a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" href="#contacts" onclick="showSection('contacts',this); return false;">Contacts</a>
+        </li>
+        <li class="nav-item">
+            <div class="cart-icon" onclick="toggleCart()">
+                My Cart
+                <span class="cart-badge" id="cartBadge">0</span>
+            </div>
+        </li>
+        </ul>
+    </div>
+    </nav>
+
+    <div class="cart-sidebar" id="cartSidebar">
+        <h3>Shopping Cart</h3>
+        <button onclick="toggleCart()" style="position: absolute; right: 20px; top: 20px; background: none; border: none; font-size: 24px; cursor: pointer; color: #BC430D;">×</button>
+        <div id="cartItems"></div>
+        <div class="cart-total">
+            Total: Rp.<span id="cartTotal">0</span>
+        </div>
+        <button class="checkout-btn" onclick="checkout()">Checkout</button>
+    </div>
+
+    <div class="main-content">
+        <div class="section active" id="home">
+            <div class="owl-logo" style="font-size: 100px;">🦉</div>
+            <h1>Welcome to OwlyReads!</h1>
+            <p class="home-subtitle">Your favorite online bookstore</p>
+            <div class="home-features">
+                <div class="feature-card">
+                    <div style="font-size: 48px;"></div>
+                    <h4>Wide Selection</h4>
+                    <p>Thousands of books across all genres</p>
+                </div>
+                <div class="feature-card">
+                    <div style="font-size: 48px;"></div>
+                    <h4>Fast Delivery</h4>
+                    <p>Get your books delivered quickly</p>
+                </div>
+                <div class="feature-card">
+                    <div style="font-size: 48px;"></div>
+                    <h4>Best Prices</h4>
+                    <p>Affordable prices for everyone</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="section" id="books">
+
+            <div class="section1" id="categoriesView">
+            <div class="box-card">
+                <div class="genre">
+                <h2 class="genre-title"><u>Novels</u></h2>
+                <div class="card-container">
+                        <div class="card" onclick="showDetails('book1')"><img src="/PROYEK MANDIRI_UTS/images/coraline.jpg" alt="cover"></div>
+                        <div class="card" onclick="showDetails('book2')"><img src="/PROYEK MANDIRI_UTS/images/enola holmes.jpg" alt=""></div>
+                        <div class="card" onclick="showDetails('book3')"><img src="/PROYEK MANDIRI_UTS/images/g3m.jpg" alt=""></div>
+                        <div class="card" onclick="showDetails('book4')"><img src="/PROYEK MANDIRI_UTS/images/malory towers.jpg" alt=""></div>
+                        <div class="card" onclick="tampilkan_semua('novels')">More...</div>
+                    </div>
+                </div>
+
+                <div class="genre">
+                <h2 class="genre-title"><u>Non-Fictions</u></h2>
+                <div class="card-container">
+                        <div class="card" onclick="showDetails('book5')"><img src="/PROYEK MANDIRI_UTS/images/non2.jpg" alt="cover"></div>
+                        <div class="card" onclick="showDetails('book6')"><img src="/PROYEK MANDIRI_UTS/images/non1.jpg" alt=""></div>
+                        <div class="card" onclick="showDetails('book7')"><img src="/PROYEK MANDIRI_UTS/images/non3.jpg" alt=""></div>
+                        <div class="card" onclick="showDetails('book8')"><img src="/PROYEK MANDIRI_UTS/images/non4.jpg" alt=""></div>
+                        <div class="card" onclick="tampilkan_semua('nonfiction')">More...</div>
+                    </div>
+                </div>
+
+                <div class="genre">
+                <h2 class="genre-title"><u>Comics</u></h2>
+                <div class="card-container">
+                        <div class="card" onclick="showDetails('book9')"><img src="/PROYEK MANDIRI_UTS/images/comic1.jpg" alt="cover"></div>
+                        <div class="card" onclick="showDetails('book10')"><img src="/PROYEK MANDIRI_UTS/images/comic2.jpg" alt=""></div>
+                        <div class="card" onclick="showDetails('book11')"><img src="/PROYEK MANDIRI_UTS/images/comic3.jpg" alt=""></div>
+                        <div class="card" onclick="showDetails('book12')"><img src="/PROYEK MANDIRI_UTS/images/comic4.jpg" alt=""></div>
+                        <div class="card" onclick="tampilkan_semua('comics')">More...</div>
+                    </div>
+                </div>
+
+                <div class="genre">
+                <h2 class="genre-title"><u>Motivationals</u></h2>
+                <div class="card-container">
+                        <div class="card" onclick="showDetails('book13')"><img src="/PROYEK MANDIRI_UTS/images/mot1.jpg" alt="cover"></div>
+                        <div class="card" onclick="showDetails('book14')"><img src="/PROYEK MANDIRI_UTS/images/mot2.jpg" alt=""></div>
+                        <div class="card" onclick="showDetails('book15')"><img src="/PROYEK MANDIRI_UTS/images/mot3.jpg" alt=""></div>
+                        <div class="card" onclick="showDetails('book16')"><img src="/PROYEK MANDIRI_UTS/images/mot4.jpg" alt=""></div>
+                        <div class="card" onclick="tampilkan_semua('motivational')">More...</div>
+                    </div>
+                </div>
+            </div>
+            </div>
+
+            <div id="allBooksContainer" class="all-books-container" style="display: none;">
+                <div class="container">
+                    <div class="d-flex justify-content-between align-items-center mb-4">
+                        <h2 id="categoryTitle">All Books</h2>
+                        <button class="btn btn-secondary" onclick="kembali_ke_kategori()">← Back to Categories</button>
+                    </div>
+                    <div id="allBooksGrid" class="row g-4">
+                    </div>
+                </div>
+            </div>
+
+            <div id="bookModal" class="modal">
+                <div class="modal-content">
+                    <img id="modalpic" src="" alt="Book cover">
+                    <span class="close" onclick="closeModal()">&times;</span>
+                    <h2 id="bookTitle"></h2>
+                    <p id="bookDesc"> Desc : </p>
+                    <p id="bookstock">Stock : </p>
+                    <p id="bookprice">Price : </p>
+                    <button onclick="addToCartFromModal()">Add to Cart</button>
+                    <button onclick="closeModal()" style="background: #999;">Close</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="section" id="contacts">
+            <div class="social-box">
+            <div class="socials">
+                <h3>Contact Us!</h3>
+                <div class="card">
+                    <div style="font-size: 32px; margin-bottom: 10px;"></div>
+                    <b>Instagram</b><br>@owlybooks_
+                </div>
+                <div class="card">
+                    <div style="font-size: 32px; margin-bottom: 10px;"></div>
+                    <b>Twitter</b> <br> @OwlyReads
+                </div>
+                <div class="card">
+                    <div style="font-size: 32px; margin-bottom: 10px;"></div>
+                    <b>Facebook</b> <br> OwlyReads_fb
+                </div>
+            </div>
+
+            <div class="box-kontak">
+                <form action="" onsubmit="return handleContactForm(event)">
+                    <h3>Send us a message!</h3><br>
+                    Nama <br>
+                    <input type="text" name="Nama" class="bio" required><br><br>
+                    Email Address <br>
+                    <input type="email" name="email" class="bio" required><br><br>
+                    Message <br>
+                    <textarea name="pesan" id="pesan" rows="4" cols="40" class="bio" required></textarea><br>
+                    <button type="submit" class="send">Send</button>
+                </form>
+            </div>
+            </div>
+        </div>
+    </div>
+
+    <footer style="background: linear-gradient(135deg, #BC430D 0%, #F09410 100%); color: white; padding: 50px 0; margin-top: 50px;" id="footer">
+        <div class="container">
+            <div class="row g-4 mb-4">
+                <div class="col-md-4">
+                    <h3 style="font-weight: 700; margin-bottom: 15px; display: flex; align-items: center; gap: 10px;">
+                        <span style="font-size: 32px;">🦉</span> OwlyReads
+                    </h3>
+                    <p style="opacity: 0.9;">Your favorite online bookstore with thousands of books across all genres.</p>
+                </div>
+                <div class="col-md-4">
+                    <h4 style="font-weight: 700; margin-bottom: 15px;">Quick Links</h4>
+                    <div style="display: flex; flex-direction: column; gap: 8px;">
+                        <a href="#home" onclick="showSection('home', document.querySelector('a[href=\'#home\']')); return false;" style="color: white; text-decoration: none; opacity: 0.9; transition: 0.3s;" onmouseover="this.style.opacity='1'; this.style.paddingLeft='10px'" onmouseout="this.style.opacity='0.9'; this.style.paddingLeft='0'">Home</a>
+                        <a href="#books" onclick="showSection('books', document.querySelector('a[href=\'#books\']')); return false;" style="color: white; text-decoration: none; opacity: 0.9; transition: 0.3s;" onmouseover="this.style.opacity='1'; this.style.paddingLeft='10px'" onmouseout="this.style.opacity='0.9'; this.style.paddingLeft='0'">Books</a>
+                        <a href="#contacts" onclick="showSection('contacts', document.querySelector('a[href=\'#contacts\']')); return false;" style="color: white; text-decoration: none; opacity: 0.9; transition: 0.3s;" onmouseover="this.style.opacity='1'; this.style.paddingLeft='10px'" onmouseout="this.style.opacity='0.9'; this.style.paddingLeft='0'">Contacts</a>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <h4 style="font-weight: 700; margin-bottom: 15px;">Follow Us</h4>
+                    <div style="display: flex; gap: 15px;">
+                        <a onclick="showSection('contacts',this)" href="#" style="width: 45px; height: 45px; background: rgba(255,255,255,0.2); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; text-decoration: none; font-weight: bold; transition: 0.3s; font-size: 20px;" onmouseover="this.style.background='rgba(255,255,255,0.3)'; this.style.transform='scale(1.1)'" onmouseout="this.style.background='rgba(255,255,255,0.2)'; this.style.transform='scale(1)'">In</a>
+                        <a onclick="showSection('contacts',this)" href="#" style="width: 45px; height: 45px; background: rgba(255,255,255,0.2); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; text-decoration: none; font-weight: bold; transition: 0.3s; font-size: 20px;" onmouseover="this.style.background='rgba(255,255,255,0.3)'; this.style.transform='scale(1.1)'" onmouseout="this.style.background='rgba(255,255,255,0.2)'; this.style.transform='scale(1)'">x</a>
+                        <a onclick="showSection('contacts',this)" href="#" style="width: 45px; height: 45px; background: rgba(255,255,255,0.2); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; text-decoration: none; font-weight: bold; transition: 0.3s; font-size: 20px;" onmouseover="this.style.background='rgba(255,255,255,0.3)'; this.style.transform='scale(1.1)'" onmouseout="this.style.background='rgba(255,255,255,0.2)'; this.style.transform='scale(1)'">Fb</a>
+                    </div>
+                </div>
+            </div>
+            <div style="border-top: 1px solid rgba(255,255,255,0.3); padding-top: 25px; text-align: center; opacity: 0.9;">
+                <p style="margin: 0;">&copy; 2024 OwlyReads. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        let cart = [];
+        let currentBookId = null;
+
+        const allBooks = {
+            book1: { title: "Coraline", desc: "Coraline Jones dan orang tua barunya pindah ke sebuah rumah tua berapartemen. Dia menemukan sebuah pintu tersembunyi yang membawanya ke 'dunia lain' yang tampak sempurna — namun penuh bahaya, karena 'Other Mother' ingin menggantikannya.", stock: 20, Price: 49000, img:"/PROYEK MANDIRI_UTS/images/coraline.jpg", category: "novels"},
+            book2: { title: "Enola Holmes: the cryptic crinoline", desc:"Enola Holmes menyelidiki penculikan wanita tua yang meninggalkannya pesan tersembunyi di sebuah rok misterius—membawanya ke rahasia besar bersama Florence Nightingale." , stock: 15, Price: 35000, img:"/PROYEK MANDIRI_UTS/images/enola holmes.jpg", category: "novels" },
+            book3: { title: "A Good girl Guide to Murder", desc: "Lima tahun sebelumnya, siswi populer bernama Andie Bell dibunuh dan pacarnya, Sal Singh, dinyatakan sebagai pembunuh lalu bunuh diri. Semua orang percaya demikian — kecuali Pip. Dia mulai menyelidiki ulang dan menemukan bahwa banyak hal yang tersembunyi. ", stock: 4, Price: 45000, img: "/PROYEK MANDIRI_UTS/images/g3m.jpg", category: "novels" },
+            book4: { title: "New Term at Malory Towers", desc: "Felicity memulai masa baru di Malory Towers dan menghadapi teman-teman baru yang penuh tantangan, dengan persahabatan dan kejujuran diuji di sekolah asrama klasik ini. ", stock: 5, Price: 25000, img: "/PROYEK MANDIRI_UTS/images/malory towers.jpg", category: "novels" },
+            book5: { title: "How to Survive a Plague", desc: "David France has been one of the key chroniclers of the AIDS epidemic in the United States since its beginnings. How to Survive a Plague follows his acclaimed documentary of the same name, compiling a definitive work on AIDS activism. ", stock: 2, Price: 60000, img: "/PROYEK MANDIRI_UTS/images/non2.jpg", category: "nonfiction" },
+            book6: { title: "100 Essays I Don't Have Time to Write", desc: "recounts all of those loose ends and sparks of inspiration that drive her as an artist. This collection of not-quite-essays bursts with wit and insight along its journey through the musings of a curious mind. ", stock: 2, Price: 60000, img: "/PROYEK MANDIRI_UTS/images/non1.jpg", category: "nonfiction" },
+            book7: { title: "Nothing to Envy", desc: "Nothing to Envy ventures inside the world's most closed-off society, giving voice to everyday people as they try to live their lives amidst totalitarianism. It is a haunting look at their despair and disillusionment — and the dreams they continue to nurture in spite of it all. ", stock: 2, Price: 60000, img: "/PROYEK MANDIRI_UTS/images/non3.jpg", category: "nonfiction" },
+            book8: { title: "Blurred Lines", desc: " Vanessa Grigoriadis travels to universities across the United States to examine how the movement has prompted students to think differently about their sexuality, as well as the sexism or sexual violence they confront on campus", stock: 2, Price: 60000, img: "/PROYEK MANDIRI_UTS/images/non4.jpg", category: "nonfiction" },
+            book9: { title: "Takopi's Original Sin", desc: "Alien lucu berbentuk gurita bernama Takopi datang ke Bumi dengan misi menyebarkan kebahagiaan. Tapi, anak SD yang pertama ia temui, Shizuka, hidup dalam penderitaan akibat bullying dan keluarga yang berantakan. Dengan gadget teknologi alien, Takopi berusaha membantu—namun justru menciptakan lingkaran tragis kematian dan perjalanan waktu yang mengerikan. ", stock: 3, Price: 125000, img:"/PROYEK MANDIRI_UTS/images/comic1.jpg", category: "comics" },
+            book10: { title: "Dandadan Vol. 1 ", desc: "Momo percaya hantu tapi nggak percaya alien. Okarun percaya alien tapi nggak percaya hantu. Buat buktiin siapa yang benar, mereka taruhan pergi ke tempat angker dan lokasi UFO. Hasilnya? Keduanya bener!", stock: 8, Price: 67000, img: "/PROYEK MANDIRI_UTS/images/comic2.jpg", category: "comics" },
+            book11: { title: "Tomie ", desc: "Tomie Kawakami adalah wanita cantik misterius yang bisa membuat pria jatuh cinta gila sampai... membunuhnya. Masalahnya? Tomie nggak bisa mati. Setiap potongan tubuhnya akan tumbuh jadi Tomie baru. ", stock: 2, Price: 385000, img: "/PROYEK MANDIRI_UTS/images/comic3.jpg", category: "comics" },
+            book12: { title: " Case Closed Vol. 1", desc: "Shinichi Kudo, detektif SMA jenius, disuntik obat misterius oleh organisasi jahat sampai tubuhnya menyusut jadi anak SD! Dengan identitas baru 'Conan Edogawa', ia harus menyembunyikan jati dirinya sambil terus memecahkan kasus-kasus sulit untuk mencari cara kembali normal.  ", stock: 2, Price: 60000, img:"/PROYEK MANDIRI_UTS/images/comic4.jpg", category: "comics" },
+            book13: { title: "The Subtle Art of Not Giving a F*ck", desc: "Buku self-help yang JUJUR. Mark Manson bilang: berhentilah peduli sama semua hal! Kita cuma punya energi terbatas, jadi pilih dengan bijak apa yang mau lo peduliin. Bukan tentang jadi cuek total, tapi fokus ke hal yang BENER-BENER penting. ", stock: 12, Price: 160000, img: "/PROYEK MANDIRI_UTS/images/mot1.jpg", category: "motivational" },
+            book14: { title: "Atomic Habits", desc: "Mau berubah tapi susah konsisten? Buku ini ngajarin cara bangun kebiasaan baik dan hapus kebiasaan buruk lewat perubahan kecil aja—cukup 1% lebih baik setiap hari! James Clear jelasin sistem 4 Laws of Behavior Change yang praktis dan scientifically proven. ", stock: 20, Price: 150000, img: "/PROYEK MANDIRI_UTS/images/mot2.jpg", category: "motivational" },
+            book15: { title: "Deep Work", desc: "Di era distraksi digital, kemampuan fokus dalam jadi superpower. Cal Newport, profesor computer science Georgetown University, ngajarin cara masuk 'deep work state'—fokus maksimal tanpa gangguan buat hasil kerja berkualitas tinggi.", stock: 7, Price: 78000, img: "/PROYEK MANDIRI_UTS/images/mot3.jpg", category: "motivational" },
+            book16: { title: "Four Thousand Weeks: Time Management for Mortals ", desc: "Kalo hidup sampe 80 tahun, lo cuma punya 4000 minggu. Singkat banget kan? Buku ini BUKAN ngajarin cara produktif maksimal, tapi gimana caranya DAMAI sama keterbatasan waktu. ", stock: 4, Price: 186000, img: "/PROYEK MANDIRI_UTS/images/mot4.jpg", category: "motivational" }
+        };
+
+        function showSection(sectionId, element) {
+            console.log('Switching to section:', sectionId);
+            document.querySelectorAll('.section').forEach(c => c.classList.remove('active'));
+            document.getElementById(sectionId).classList.add('active');
+
+            document.querySelectorAll('.nav-link').forEach(link => link.classList.remove('active'));
+            if(element) element.classList.add('active');
+            
+            if(sectionId === 'books') {
+                kembali_ke_kategori();
+            }
+        }
+
+        function showDetails(bookId) {
+            currentBookId = bookId;
+            const book = allBooks[bookId];
+            document.getElementById("modalpic").src = book.img;
+            document.getElementById("bookTitle").innerText = "Title: " + book.title;
+            document.getElementById("bookDesc").innerText = "Description: " + book.desc;
+            document.getElementById("bookstock").innerText = "Stock: " + book.stock;
+            document.getElementById("bookprice").innerText = "Price: Rp." + book.Price.toLocaleString();
+            document.getElementById("bookModal").style.display = "flex";
+        }
+
+        function closeModal() {
+            document.getElementById("bookModal").style.display = "none";
+            currentBookId = null;
+        }
+
+        function addToCartFromModal() {
+            if(!currentBookId) return;
+            
+            const book = allBooks[currentBookId];
+            const existingItem = cart.find(item => item.id === currentBookId);
+            
+            if(existingItem) {
+                if(existingItem.quantity < book.stock) {
+                    existingItem.quantity++;
+                    alert(book.title + ' berhasil ditambahkan ke cart!');
+                } else {
+                    alert('Stok tidak cukup!');
+                    return;
+                }
+            } else {
+                cart.push({
+                    id: currentBookId,
+                    title: book.title,
+                    price: book.Price,
+                    img: book.img,
+                    quantity: 1,
+                    maxStock: book.stock
+                });
+                alert(book.title + ' berhasil ditambahkan ke cart!');
+            }
+            
+            updateCart();
+            closeModal();
+        }
+
+        function toggleCart() {
+            const cartSidebar = document.getElementById('cartSidebar');
+            const overlay = document.getElementById('overlay');
+            cartSidebar.classList.toggle('active');
+            
+            if(cartSidebar.classList.contains('active')) {
+                overlay.style.display = 'block';
+            } else {
+                overlay.style.display = 'none';
+            }
+        }
+
+        function updateCart() {
+            const cartItems = document.getElementById('cartItems');
+            const cartBadge = document.getElementById('cartBadge');
+            const cartTotal = document.getElementById('cartTotal');
+            
+            if(cart.length === 0) {
+                cartItems.innerHTML = '<p style="text-align: center; padding: 20px; color: #999;">Cart is empty</p>';
+                cartBadge.textContent = '0';
+                cartTotal.textContent = '0';
+                return;
+            }
+            
+            let totalPrice = 0;
+            let totalItems = 0;
+            
+            cartItems.innerHTML = cart.map(item => {
+                totalPrice += item.price * item.quantity;
+                totalItems += item.quantity;
+                
+                return `
+                    <div class="cart-item">
+                        <img src="${item.img}" alt="${item.title}">
+                        <div class="cart-item-info">
+                            <strong>${item.title}</strong><br>
+                            <small>Rp.${item.price.toLocaleString()}</small><br>
+                            <div style="display: flex; gap: 10px; align-items: center; margin-top: 5px;">
+                                <button onclick="changeQuantity('${item.id}', -1)" style="background: #ffeaf0; border: 1px solid #F09410; padding: 2px 8px; cursor: pointer; border-radius: 3px; color: #BC430D; font-weight: 600;">-</button>
+                                <span>${item.quantity}</span>
+                                <button onclick="changeQuantity('${item.id}', 1)" style="background: #ffeaf0; border: 1px solid #F09410; padding: 2px 8px; cursor: pointer; border-radius: 3px; color: #BC430D; font-weight: 600;">+</button>
+                            </div>
+                        </div>
+                        <button class="cart-item-remove" onclick="removeFromCart('${item.id}')">×</button>
+                    </div>
+                `;
+            }).join('');
+            
+            cartBadge.textContent = totalItems;
+            cartTotal.textContent = totalPrice.toLocaleString();
+        }
+
+        function changeQuantity(bookId, change) {
+            const item = cart.find(i => i.id === bookId);
+            if(!item) return;
+            
+            const newQuantity = item.quantity + change;
+            
+            if(newQuantity <= 0) {
+                removeFromCart(bookId);
+                return;
+            }
+            
+            if(newQuantity > item.maxStock) {
+                alert('Stok tidak cukup! Maksimal: ' + item.maxStock);
+                return;
+            }
+            
+            item.quantity = newQuantity;
+            updateCart();
+        }
+
+        function removeFromCart(bookId) {
+            cart = cart.filter(item => item.id !== bookId);
+            updateCart();
+        }
+
+        function checkout() {
+            if(cart.length === 0) {
+                alert('Cart kosong!');
+                return;
+            }
+            
+            const total = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+            const itemsList = cart.map(item => `${item.title} (x${item.quantity})`).join('\n');
+            
+            if(confirm(`Checkout pesanan:\n\n${itemsList}\n\nTotal: Rp.${total.toLocaleString()}\n\nLanjutkan?`)) {
+                alert('Terima kasih! Pesanan Anda sedang diproses.');
+                cart = [];
+                updateCart();
+                toggleCart();
+            }
+        }
+
+        function tampilkan_semua(category) {
+            const categoriesView = document.getElementById('categoriesView');
+            const allBooksContainer = document.getElementById('allBooksContainer');
+            const allBooksGrid = document.getElementById('allBooksGrid');
+            const categoryTitle = document.getElementById('categoryTitle');
+            
+            categoriesView.style.display = 'none';
+            allBooksContainer.style.display = 'block';
+            
+            const filteredBooks = Object.entries(allBooks).filter(([id, book]) => 
+                book.category === category
+            );
+            
+            const titles = {
+                'novels': 'All Novels',
+                'nonfiction': 'All Non-Fiction Books',
+                'comics': 'All Comics',
+                'motivational': 'All Motivational Books'
+            };
+            categoryTitle.textContent = titles[category] || 'All Books';
+            
+            allBooksGrid.innerHTML = filteredBooks.map(([id, book]) => `
+                <div class="col-md-3 col-sm-6">
+                    <div class="book-grid-item" onclick="showDetails('${id}')">
+                        <img src="${book.img}" alt="${book.title}">
+                        <h5 style="margin-top: 10px; font-size: 14px;">${book.title}</h5>
+                        <p style="color: #F09410; font-weight: bold;">Rp.${book.Price.toLocaleString()}</p>
+                        <small style="color: #BC430D;">Stock: ${book.stock}</small>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function kembali_ke_kategori() {
+            document.getElementById('categoriesView').style.display = 'flex';
+            document.getElementById('allBooksContainer').style.display = 'none';
+        }
+
+        function handleContactForm(event) {
+            event.preventDefault();
+            const formData = new FormData(event.target);
+            const name = formData.get('Nama');
+            const email = formData.get('email');
+            const message = formData.get('pesan');
+            
+            alert(`Terima kasih ${name}!\n\nPesan Anda telah dikirim. Kami akan menghubungi Anda melalui ${email} segera.`);
+            event.target.reset();
+            return false;
+        }
+
+        window.onclick = function(event) {
+            const modal = document.getElementById('bookModal');
+            if (event.target == modal) {
+                closeModal();
+            }
+        }
+    </script>
+</body>
+</html>
