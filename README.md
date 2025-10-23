@@ -10,3 +10,4 @@ ini tampilan social media dan messages untuk kritik dan saran
 ini tampilan detail buku
 ![alt text](https://github.com/yeay-0/UTS-PBP/blob/main/screenshots/Screenshot%202025-10-23%20202337.png)
 ini tempilan dari keranjangnya
+LINK VID : https://youtu.be/nLD9ci06_dI
